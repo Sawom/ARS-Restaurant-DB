@@ -18,13 +18,21 @@ async function run(){
     try{
        await client.connect();
        const menuCollection = client.db('ARS-Restaurant').collection('menu'); // menu collection from mongodb
-
        const reviewCollection = client.db('ARS-Restaurant').collection('reviews');  // reviews collection from mongodb
+       const cartCollection = client.db('ARS-Restaurant').collection('carts');
 
-       // menu collection theke find method use kore shob menu antechi from mongodb atlas
-       app.get('/menu', async(req, res)=>{
+        // menu collection theke find method use kore shob menu antechi from mongodb atlas
+        app.get('/menu', async(req, res)=>{
             const result = await menuCollection.find().toArray();
             res.send(result);
+       })
+
+        //cart collection
+       app.post('/carts', async(req,res) =>{
+        const item = req.body;
+        console.log(item);
+        const result = await cartCollection.insertOne(item);
+        res.send(result);
        })
 
     // reviews collection theke find method use kore shob menu antechi from mongodb atlas 
