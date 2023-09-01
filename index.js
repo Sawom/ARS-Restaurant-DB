@@ -27,7 +27,20 @@ async function run(){
             res.send(result);
        })
 
-        //cart collection
+    //cart collection api
+    //   ekhane email diye query mane filter kortechi r email wise data dekhacchi.
+    app.get('/carts', async(req, res)=>{
+        const email = req.query.email;
+        // console.log(email);
+        if(!email){
+            res.send([]);
+        }
+        const query = { email: email };
+        const result = await cartCollection.find(query).toArray();
+        res.send(result);
+      })
+
+       //cart er data collection
        app.post('/carts', async(req,res) =>{
         const item = req.body;
         console.log(item);
