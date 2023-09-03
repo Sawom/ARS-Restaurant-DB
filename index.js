@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config(); 
 // eta na dile dot env kaj kore na
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 const app = express();
 
@@ -40,13 +40,21 @@ async function run(){
         res.send(result);
       })
 
-       //cart er data collection
-       app.post('/carts', async(req,res) =>{
+    //cart er data collection
+    app.post('/carts', async(req,res) =>{
         const item = req.body;
         console.log(item);
         const result = await cartCollection.insertOne(item);
         res.send(result);
-       })
+    })
+
+    // delete data. ekhane dashboard theke user er order data delete korbo
+    app.delete('/carts/:id', async(req,res)=>{
+        const id = req.params.id;
+        const query  = { _id: new ObjectId(id) };
+        const result = await cartCollection.deleteOne(query);
+        res.send(result);
+    } )
 
     // reviews collection theke find method use kore shob menu antechi from mongodb atlas 
     app.get('/reviews', async(req, res)=>{
