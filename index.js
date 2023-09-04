@@ -17,9 +17,17 @@ const client = new MongoClient(uri, { serverApi: { version: ServerApiVersion.v1,
 async function run(){
     try{
        await client.connect();
+       const usersCollection = client.db('ARS-Restaurant').collection('users'); // user register or google sign in data stored
        const menuCollection = client.db('ARS-Restaurant').collection('menu'); // menu collection from mongodb
        const reviewCollection = client.db('ARS-Restaurant').collection('reviews');  // reviews collection from mongodb
-       const cartCollection = client.db('ARS-Restaurant').collection('carts');
+       const cartCollection = client.db('ARS-Restaurant').collection('carts');   // carts data collection
+
+        // users api
+        app.post('/users', async(req,res) =>{
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
+        } )
 
         // menu collection theke find method use kore shob menu antechi from mongodb atlas
         app.get('/menu', async(req, res)=>{
