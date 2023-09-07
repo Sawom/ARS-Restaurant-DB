@@ -22,9 +22,18 @@ async function run(){
        const reviewCollection = client.db('ARS-Restaurant').collection('reviews');  // reviews collection from mongodb
        const cartCollection = client.db('ARS-Restaurant').collection('carts');   // carts data collection
 
-        // users api
+        // users api both email and google login. 
+        // 2types user e database e add korbe
         app.post('/users', async(req,res) =>{
             const user = req.body;
+            const query = {email: user.email}
+            const existingUser = await usersCollection.findOne(query);
+            console.log( 'existingUser: ', existingUser);
+            // google sign in diye korar somoy zodi email ta age theke
+            // thake tahole new add hobe na. otherwise add hobe
+            if(existingUser){
+                return res.send({ message: 'user already exists!' })
+            }
             const result = await usersCollection.insertOne(user);
             res.send(result);
         } )
