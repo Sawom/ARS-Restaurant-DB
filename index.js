@@ -22,6 +22,12 @@ async function run(){
        const reviewCollection = client.db('ARS-Restaurant').collection('reviews');  // reviews collection from mongodb
        const cartCollection = client.db('ARS-Restaurant').collection('carts');   // carts data collection
 
+        // show users
+        app.get( '/users', async(req,res) =>{
+            const result = await usersCollection.find().toArray();
+            res.send(result);
+        } )
+
         // users api both email and google login. 
         // 2types user e database e add korbe
         app.post('/users', async(req,res) =>{
