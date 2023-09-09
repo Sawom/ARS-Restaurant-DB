@@ -23,10 +23,24 @@ async function run(){
        const cartCollection = client.db('ARS-Restaurant').collection('carts');   // carts data collection
 
         // show users
-        app.get( '/users', async(req,res) =>{
+        app.get( '/users', async(req, res) =>{
             const result = await usersCollection.find().toArray();
             res.send(result);
         } )
+
+        // make admin from user. patch kortechi karon just ekta info update korbo.
+        // pura info update korle put use kortam.  users/admin/ dichi admin banabo tai
+        app.patch('users/admin/:id', async(req, res)=>{
+            const id = req.params.id;
+            const filter = {_id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    role: 'admin'
+                },
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
 
         // users api both email and google login. 
         // 2types user e database e add korbe
