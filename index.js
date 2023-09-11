@@ -12,6 +12,28 @@ const jwt = require('jsonwebtoken');
 app.use(cors());
 app.use(express.json());
 
+// jwt token verify. eta dekhteche user thik kore ashe kina
+//authorization header ashle etar vitor zabe na. na thakle ekta error dilam.
+// header thakle token ber korar cesta kortechi. token pawa gele normal kaj korbo.
+// error khaile abar ager moto send kortechi
+const verifyJWT = (req, res, next) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).send({ error: true, message: 'unauthorized access' });
+  }
+  // bearer token.
+  // authorization er header 2vabe thake 1. bearer 2. token
+  const token = authorization.split(' ')[1];
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ error: true, message: 'unauthorized access' })
+    }
+    req.decoded = decoded;
+    next();
+  })
+} // end
+
 // connection
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bsdjaxv.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true,}});
@@ -77,14 +99,23 @@ async function run(){
        })
 
         //cart collection api
-        //   ekhane email diye query mane filter kortechi r email wise data dekhacchi.
+        // ekhane email diye query mane filter kortechi r email wise data dekhacchi.
         // ze login korbe tar data dekhabe
-        app.get('/carts', async(req, res)=>{
+       //  ****jwt used here...........
+        // ze keu email kore data pay tai token diye verrify kortechi
+        app.get('/carts', verifyJWT, async(req, res)=>{
             const email = req.query.email;
             // console.log(email);
+            // jwt part
             if(!email){
                 res.send([]);
             }
+
+            const decodedEmail = req.decoded.email;
+            if (email !== decodedEmail) {
+                return res.status(403).send({ error: true, message: 'forbidden access' })
+            } // end jwt part
+
             const query = { email: email };
             const result = await cartCollection.find(query).toArray();
             res.send(result);
