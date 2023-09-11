@@ -5,6 +5,8 @@ require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 const app = express();
+// jwt token
+const jwt = require('jsonwebtoken');
 
 // middleware
 app.use(cors());
@@ -17,6 +19,7 @@ const client = new MongoClient(uri, { serverApi: { version: ServerApiVersion.v1,
 async function run(){
     try{
        await client.connect();
+        //    making collection
        const usersCollection = client.db('ARS-Restaurant').collection('users'); // user register or google sign in data stored
        const menuCollection = client.db('ARS-Restaurant').collection('menu'); // menu collection from mongodb
        const reviewCollection = client.db('ARS-Restaurant').collection('reviews');  // reviews collection from mongodb
@@ -30,7 +33,7 @@ async function run(){
 
         // make admin from user. patch kortechi karon just ekta info update korbo.
         // pura info update korle put use kortam.  users/admin/ dichi admin banabo tai
-        app.patch('users/admin/:id', async(req, res)=>{
+        app.patch('/users/admin/:id', async(req, res)=>{
             const id = req.params.id;
             const filter = {_id: new ObjectId(id) };
             const updateDoc = {
@@ -66,6 +69,7 @@ async function run(){
 
     //cart collection api
     //   ekhane email diye query mane filter kortechi r email wise data dekhacchi.
+    // ze login korbe tar data dekhabe
     app.get('/carts', async(req, res)=>{
         const email = req.query.email;
         // console.log(email);
@@ -86,12 +90,20 @@ async function run(){
     })
 
     // delete data. ekhane dashboard theke user er order data delete korbo
-    app.delete('/carts/:id', async(req,res)=>{
+    app.delete('/carts/:id', async(req,res) =>{
         const id = req.params.id;
         const query  = { _id: new ObjectId(id) };
         const result = await cartCollection.deleteOne(query);
         res.send(result);
     } )
+
+    // delete users
+    app.delete('/users/:id', async(req,res) =>{
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await usersCollection.deleteOne(query);
+        res.send(result);
+    })
 
     // reviews collection theke find method use kore shob menu antechi from mongodb atlas 
     app.get('/reviews', async(req, res)=>{
