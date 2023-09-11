@@ -25,6 +25,15 @@ async function run(){
        const reviewCollection = client.db('ARS-Restaurant').collection('reviews');  // reviews collection from mongodb
        const cartCollection = client.db('ARS-Restaurant').collection('carts');   // carts data collection
 
+        // create jwt token. client side thek call dite hobe
+        app.post('/jwt', (req,res)=>{
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, 
+                {expiresIn: '1h'})
+            
+            res.send({token})
+        } )
+
         // show users
         app.get( '/users', async(req, res) =>{
             const result = await usersCollection.find().toArray();
@@ -67,49 +76,49 @@ async function run(){
             res.send(result);
        })
 
-    //cart collection api
-    //   ekhane email diye query mane filter kortechi r email wise data dekhacchi.
-    // ze login korbe tar data dekhabe
-    app.get('/carts', async(req, res)=>{
-        const email = req.query.email;
-        // console.log(email);
-        if(!email){
-            res.send([]);
-        }
-        const query = { email: email };
-        const result = await cartCollection.find(query).toArray();
-        res.send(result);
-      })
+        //cart collection api
+        //   ekhane email diye query mane filter kortechi r email wise data dekhacchi.
+        // ze login korbe tar data dekhabe
+        app.get('/carts', async(req, res)=>{
+            const email = req.query.email;
+            // console.log(email);
+            if(!email){
+                res.send([]);
+            }
+            const query = { email: email };
+            const result = await cartCollection.find(query).toArray();
+            res.send(result);
+        })
 
-    //cart er data collection
-    app.post('/carts', async(req,res) =>{
-        const item = req.body;
-        console.log(item);
-        const result = await cartCollection.insertOne(item);
-        res.send(result);
-    })
+        //cart er data collection
+        app.post('/carts', async(req,res) =>{
+            const item = req.body;
+            console.log(item);
+            const result = await cartCollection.insertOne(item);
+            res.send(result);
+        })
 
-    // delete data. ekhane dashboard theke user er order data delete korbo
-    app.delete('/carts/:id', async(req,res) =>{
-        const id = req.params.id;
-        const query  = { _id: new ObjectId(id) };
-        const result = await cartCollection.deleteOne(query);
-        res.send(result);
-    } )
+        // delete data. ekhane dashboard theke user er order data delete korbo
+        app.delete('/carts/:id', async(req,res) =>{
+            const id = req.params.id;
+            const query  = { _id: new ObjectId(id) };
+            const result = await cartCollection.deleteOne(query);
+            res.send(result);
+        } )
 
-    // delete users
-    app.delete('/users/:id', async(req,res) =>{
-        const id = req.params.id;
-        const query = { _id: new ObjectId(id) };
-        const result = await usersCollection.deleteOne(query);
-        res.send(result);
-    })
+        // delete users
+        app.delete('/users/:id', async(req,res) =>{
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await usersCollection.deleteOne(query);
+            res.send(result);
+        })
 
-    // reviews collection theke find method use kore shob menu antechi from mongodb atlas 
-    app.get('/reviews', async(req, res)=>{
-        const reviewsResult = await reviewCollection.find().toArray();
-        res.send(reviewsResult);
-    })
+        // reviews collection theke find method use kore shob menu antechi from mongodb atlas 
+        app.get('/reviews', async(req, res)=>{
+            const reviewsResult = await reviewCollection.find().toArray();
+            res.send(reviewsResult);
+        })
 
     }
 
