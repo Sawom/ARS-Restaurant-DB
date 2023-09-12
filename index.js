@@ -51,7 +51,7 @@ async function run(){
         app.post('/jwt', (req,res)=>{
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, 
-                {expiresIn: '1h'})
+                {expiresIn: '5h'})
             
             res.send({token})
         } )
@@ -59,6 +59,24 @@ async function run(){
         // show users
         app.get( '/users', async(req, res) =>{
             const result = await usersCollection.find().toArray();
+            res.send(result);
+        } )
+
+        // user admin kina check korbo. 
+        // ze call korbe se valid kina etaw jwt diye check kortechi
+        // token e ze user ache r zake check kora hoiche 2jon same kina
+        // 1. security layer: verifyJWT
+        // 2. email same
+        // 3. check admin
+        app.get('/users/admin/:email', verifyJWT, async(req, res)=>{
+            const email = req.params.email;
+            // 2ta token same kina
+            if(req.decoded.email !== email ){
+                res.send( {admin: false} )
+            }
+            const query = {email: email}
+            const user = await usersCollection.findOne(query);
+            const result = { admin: user?.role === 'admin'}
             res.send(result);
         } )
 
