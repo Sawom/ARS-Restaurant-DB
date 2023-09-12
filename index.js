@@ -50,14 +50,30 @@ async function run(){
         // create jwt token. client side thek call dite hobe
         app.post('/jwt', (req,res)=>{
             const user = req.body;
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, 
-                {expiresIn: '5h'})
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'})
             
             res.send({token})
         } )
 
-        // show users
-        app.get( '/users', async(req, res) =>{
+        // Warning: use verifyJWT before using verifyAdmin
+        // verify admin middleware
+        const verifyAdmin = async (req, res, next) => {
+        const email = req.decoded.email;
+        const query = { email: email }
+        const user = await usersCollection.findOne(query);
+        if (user?.role !== 'admin') {
+            return res.status(403).send({ error: true, message: 'forbidden message' });
+        }
+        next();
+        }
+
+        /**
+         * 0. do not show secure links to those who should not see the links
+         * 1. use jwt token: verifyJWT
+         * 2. use verifyAdmin middleware
+        */
+        // show all users
+        app.get( '/users', verifyJWT, verifyAdmin, async(req, res) =>{
             const result = await usersCollection.find().toArray();
             res.send(result);
         } )
