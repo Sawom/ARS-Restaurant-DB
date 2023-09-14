@@ -50,7 +50,7 @@ async function run(){
         // create jwt token. client side thek call dite hobe
         app.post('/jwt', (req,res)=>{
             const user = req.body;
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'})
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '6h'})
             
             res.send({token})
         } )
@@ -58,13 +58,13 @@ async function run(){
         // Warning: use verifyJWT before using verifyAdmin
         // verify admin middleware
         const verifyAdmin = async (req, res, next) => {
-        const email = req.decoded.email;
-        const query = { email: email }
-        const user = await usersCollection.findOne(query);
-        if (user?.role !== 'admin') {
-            return res.status(403).send({ error: true, message: 'forbidden message' });
-        }
-        next();
+            const email = req.decoded.email;
+            const query = { email: email }
+            const user = await usersCollection.findOne(query);
+            if (user?.role !== 'admin') {
+                return res.status(403).send({ error: true, message: 'forbidden message' });
+            }
+            next();
         }
 
         /**
@@ -94,6 +94,7 @@ async function run(){
             const user = await usersCollection.findOne(query);
             const result = { admin: user?.role === 'admin'}
             res.send(result);
+            
         } )
 
         // make admin from user. patch kortechi karon just ekta info update korbo.
@@ -131,6 +132,14 @@ async function run(){
             const result = await menuCollection.find().toArray();
             res.send(result);
        })
+
+        // add menu in database
+        // admin secure
+        app.post('/menu',verifyJWT, verifyAdmin, async(req,res)=>{
+            const newItem = req.body;
+            const result = await menuCollection.insertOne(newItem);
+            res.send(result);
+        })
 
         //cart collection api
         // ekhane email diye query mane filter kortechi r email wise data dekhacchi.
