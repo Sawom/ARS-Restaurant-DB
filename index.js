@@ -135,9 +135,17 @@ async function run(){
 
         // add menu in database
         // admin secure
-        app.post('/menu',verifyJWT, verifyAdmin, async(req,res)=>{
+        app.post('/menu', verifyJWT, verifyAdmin, async(req,res)=>{
             const newItem = req.body;
             const result = await menuCollection.insertOne(newItem);
+            res.send(result);
+        })
+
+        // menu delete. admin secure
+        app.delete('/menu/:id', verifyJWT, verifyAdmin, async(req, res)=>{
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await menuCollection.deleteOne(query);
             res.send(result);
         })
 
