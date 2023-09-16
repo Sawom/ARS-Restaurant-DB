@@ -47,6 +47,8 @@ async function run(){
        const menuCollection = client.db('ARS-Restaurant').collection('menu'); // menu collection from mongodb
        const reviewCollection = client.db('ARS-Restaurant').collection('reviews');  // reviews collection from mongodb
        const cartCollection = client.db('ARS-Restaurant').collection('carts');   // carts data collection
+       const paymentCollection = client.db('ARS-Restaurant').collection('payments');   // payments data collection
+
 
         // create jwt token. client side thek call dite hobe
         app.post('/jwt', (req,res)=>{
@@ -203,7 +205,17 @@ async function run(){
             res.send({
                 clientSecret: paymentIntent.client_secret
             })
-            
+
+        })
+
+        // payment store related api
+        // payment howar por cart item gula shob remove kore dicchi
+        app.post('/payments', verifyJWT, async(req,res)=>{
+            const payment = req.body;
+            const insertResult = await paymentCollection.insertOne(payment);
+            const query = { _id: { $in: payment.cartItems.map(id => new ObjectId(id)) } }
+            const deleteResult = await cartCollection.deleteMany(query)
+            res.send({ insertResult, deleteResult });
         })
 
         // delete users
