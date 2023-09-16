@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config(); 
+require('dotenv').config();
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY);
 // eta na dile dot env kaj kore na
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
@@ -187,6 +188,21 @@ async function run(){
             const result = await cartCollection.deleteOne(query);
             res.send(result);
         } )
+
+        // payment api from docs stripe
+        // create payment intent
+        app.post('create-payment-intent', async (req,res) =>{
+            const {price} = req.body;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntent.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types : ['card']
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
+        })
 
         // delete users
         app.delete('/users/:id', async(req,res) =>{
