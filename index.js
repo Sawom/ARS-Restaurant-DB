@@ -240,13 +240,17 @@ async function run(){
             const orders = await paymentCollection.estimatedDocumentCount();
 
             // best way to get sum. eta diye revenue dekhabo
-            const payments = await paymentCollection().find().toArray();
-            const revenue = payments.reduce ((sum, payment) => sum + payment.price , 0 );
-            res.send(
-                users,
-                products,
-                orders
+            const payments = await paymentCollection.find().toArray();
+            const revenue = payments.reduce((sum, payment) => sum + payment.price , 0 );
+            
+            res.send({
+                    users,
+                    products,
+                    orders,
+                    revenue
+                }
             )
+
         })
 
     }
