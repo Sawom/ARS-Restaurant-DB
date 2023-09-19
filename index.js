@@ -137,7 +137,7 @@ async function run(){
        })
 
         // add menu in database
-        // admin secure
+        // admin secure. admin er kaj
         app.post('/menu', verifyJWT, verifyAdmin, async(req,res)=>{
             const newItem = req.body;
             const result = await menuCollection.insertOne(newItem);
@@ -244,56 +244,16 @@ async function run(){
             const revenue = payments.reduce((sum, payment) => sum + payment.price , 0 );
             
             res.send({
+                    revenue,
                     users,
                     products,
                     orders,
-                    revenue
                 }
             )
 
         })
 
-        // kon item er koto tk sell hoiche shei info
-        // from chat gpt
-         app.get('/order-stats', verifyJWT, verifyAdmin, async(req, res) =>{
-      const pipeline = [
-        {
-          $lookup: {
-            from: 'menu',
-            localField: 'menuItems',
-            foreignField: '_id',
-            as: 'menuItemsData'
-          }
-        },
-        {
-          $unwind: '$menuItemsData'
-        },
-        {
-          $group: {
-            _id: '$menuItemsData.category',
-            count: { $sum: 1 },
-            total: { $sum: '$menuItemsData.price' }
-          }
-        },
-        {
-          $project: {
-            category: '$_id',
-            count: 1,
-            total: { $round: ['$total', 2] },
-            _id: 0
-          }
-        }
-      ];
-
-      const result = await paymentCollection.aggregate(pipeline).toArray()
-      res.send(result)
-
-    })
-
-
     }
-
-    
 
     finally{
         // eta fakai thakbe
