@@ -152,6 +152,25 @@ async function run(){
             res.send(result);
         })
 
+        // update menu
+        app.put('/menu/:id', verifyJWT, verifyAdmin, async(req, res)=>{
+            const id = req.params.id;
+            const updateMenu = req.body;
+            const filter  = { _id: new ObjectId(id)} ;
+            const options = {upsert : true};
+            const updateDoc = {
+                $set:{
+                    name: updateMenu.name,
+                    category: updateMenu.category,
+                    price: updateMenu.price,
+                    details: updateMenu.details
+                },
+            } ;
+            const updateResult = await menuCollection.updateOne(filter, updateDoc, options);
+            res.json(updateResult);
+            console.log('update = ', updateResult);
+        })
+
         //cart collection api
         // ekhane email diye query mane filter kortechi r email wise data dekhacchi.
         // ze login korbe tar data dekhabe
