@@ -136,6 +136,14 @@ async function run(){
             res.send(result);
        })
 
+        // load a single menu. eta update er jnno kaje lagbe
+        app.get('/menu/:id', async(req,res)=>{
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id)}
+            const result = await menuCollection.findOne(query);
+            res.send(result);
+        })   
+
         // add menu in database
         // admin secure. admin er kaj
         app.post('/menu', verifyJWT, verifyAdmin, async(req,res)=>{
@@ -144,31 +152,32 @@ async function run(){
             res.send(result);
         })
 
+        // put
+        // update menu verifyJWT, verifyAdmin,
+        app.put('/menu/:id', async(req, res)=>{
+            const id = req.params.id;
+            const updatedMenu = req.body;
+            const filter  = { _id: new ObjectId(id)};
+            const options = {upsert : true};
+            const updateDoc = {
+                $set:{
+                    name: updatedMenu.name,
+                    recipe: updatedMenu.recipe,
+                    category: updatedMenu.category,
+                    price: updatedMenu.price
+                },
+            } ;
+            const result = await menuCollection.updateOne(filter, updateDoc, options)
+            res.send(result);
+            console.log('update = ', result);
+        })
+
         // menu delete. admin secure
         app.delete('/menu/:id', verifyJWT, verifyAdmin, async(req, res)=>{
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await menuCollection.deleteOne(query);
             res.send(result);
-        })
-
-        // update menu
-        app.put('/menu/:id', verifyJWT, verifyAdmin, async(req, res)=>{
-            const id = req.params.id;
-            const updateMenu = req.body;
-            const filter  = { _id: new ObjectId(id)} ;
-            const options = {upsert : true};
-            const updateDoc = {
-                $set:{
-                    name: updateMenu.name,
-                    category: updateMenu.category,
-                    price: updateMenu.price,
-                    details: updateMenu.details
-                },
-            } ;
-            const updateResult = await menuCollection.updateOne(filter, updateDoc, options);
-            res.json(updateResult);
-            console.log('update = ', updateResult);
         })
 
         //cart collection api
